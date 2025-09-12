@@ -1,0 +1,260 @@
+package com.fantalab.Services;
+
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.file.Paths;
+import java.time.Duration;
+import java.util.*;
+
+public class ApiService {
+    private static final HttpClient httpClient = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(30))
+            .build();
+
+    private final String authToken;
+    private final String localFilePath = "C:\\Users\\luca.milia\\players_decompressed.json";;
+
+    // Costruttore originale per retrocompatibilità
+    public ApiService(String authToken) {
+        this.authToken = authToken;
+    }
+
+
+    public List<JSONObject> getPlayerStrategies() throws Exception {
+        String numberPayload = "4d5d6eb4-521f-4274-8521-1f52c9314f81";
+        String apiUrl = "https://api.fantalab.it/v2/player-strategy";
+        String payload = "{\"strategy_id\":\"" + numberPayload + "\"}";
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(apiUrl))
+                .header("Authorization", "Bearer " + authToken)
+                .header("Content-Type", "application/json")
+                .header("Accept", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(payload))
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+        JSONArray responseArray2 = new JSONArray(response.body());
+        List<String> playerIds = new ArrayList<>();
+
+        for (int i = 0; i < responseArray2.length(); i++) {
+            JSONObject strategy = responseArray2.getJSONObject(i);
+            String playerId = strategy.getString("player_id");
+            playerIds.add(playerId);
+            System.out.println(i + " - " + playerId);
+        }
+        if (response.statusCode() != 200) {
+            throw new Exception("HTTP Error: " + response.statusCode() + " - " + response.body());
+        }
+
+        JSONArray responseArray = new JSONArray(response.body());
+        List<JSONObject> result = new ArrayList<>();
+
+        for (int i = 0; i < responseArray.length(); i++) {
+            result.add(responseArray.getJSONObject(i));
+        }
+
+        return result;
+    }
+
+    List<String> getPlayersId() throws IOException, InterruptedException {
+        String numberPayload = "4d5d6eb4-521f-4274-8521-1f52c9314f81";
+        String apiUrl = "https://api.fantalab.it/v2/player-strategy";
+        String payload = "{\"strategy_id\":\"" + numberPayload + "\"}";
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(apiUrl))
+                .header("Authorization", "Bearer " + authToken)
+                .header("Content-Type", "application/json")
+                .header("Accept", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(payload))
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+        JSONArray responseArray2 = new JSONArray(response.body());
+        List<String> playerIds = new ArrayList<>();
+
+        for (int i = 0; i < responseArray2.length(); i++) {
+            JSONObject strategy = responseArray2.getJSONObject(i);
+            String playerId = strategy.getString("player_id");
+            playerIds.add(playerId);
+            System.out.println(i + " - " + playerId);
+        }
+        return playerIds;
+
+    }
+
+    public List<String> findMissingPlayerIds() throws Exception {
+        // Ottieni gli ID dalla API
+        List<String> apiPlayerIds = getPlayersId();
+
+        // Ottieni gli ID dal file locale
+        Map<String, JSONObject> localPlayers = getPlayerInfosFromLocalFile();
+        Set<String> localPlayerIds = localPlayers.keySet();
+
+        // Trova gli ID presenti nella API ma non nel file locale
+        List<String> missingIds = new ArrayList<>();
+        for (String apiId : apiPlayerIds) {
+            if (!localPlayerIds.contains(apiId)) {
+                missingIds.add(apiId);
+            }
+        }
+
+        return missingIds;
+    }
+
+    public List<String> findCommonPlayerIds() throws Exception {
+        // Ottieni gli ID dalla API
+        List<String> apiPlayerIds = getPlayersId();
+
+        // Ottieni gli ID dal file locale
+        Map<String, JSONObject> localPlayers = getPlayerInfosFromLocalFile();
+        Set<String> localPlayerIds = localPlayers.keySet();
+
+        // Trova gli ID presenti in entrambe le sorgenti
+        List<String> commonIds = new ArrayList<>();
+        for (String apiId : apiPlayerIds) {
+            if (localPlayerIds.contains(apiId)) {
+                commonIds.add(apiId);
+            }
+        }
+
+        return commonIds;
+    }
+
+    public void comparePlayerIds() throws Exception {
+        // Ottieni gli ID dalla API
+        List<String> apiPlayerIds = getPlayersId();
+        System.out.println("Numero di player dalla API: " + apiPlayerIds.size());
+
+        // Ottieni gli ID dal file locale
+        Map<String, JSONObject> localPlayers = getPlayerInfosFromLocalFile();
+        System.out.println("Numero di player dal file locale: " + localPlayers.size());
+
+        // Trova gli ID mancanti
+        List<String> missingIds = findMissingPlayerIds();
+        System.out.println("Player ID mancanti nel file locale: " + missingIds.size());
+
+        if (!missingIds.isEmpty()) {
+            System.out.println("ID mancanti:");
+            for (String missingId : missingIds) {
+                System.out.println("  - " + missingId);
+            }
+        }
+
+        // Trova gli ID in comune
+        List<String> commonIds = findCommonPlayerIds();
+        System.out.println("Player ID in comune: " + commonIds.size());
+
+        // Puoi anche verificare se ci sono ID nel file locale che non sono nella API
+        Set<String> localOnlyIds = new HashSet<>(localPlayers.keySet());
+        localOnlyIds.removeAll(new HashSet<>(apiPlayerIds));
+        System.out.println("Player ID presenti solo nel file locale: " + localOnlyIds.size());
+    }
+
+    // Metodo per leggere dal file locale
+    public Map<String, JSONObject> getPlayerInfosFromLocalFile() throws Exception {
+        Map<String, JSONObject> playerInfoMap = new HashMap<>();
+        JsonFactory factory = new JsonFactory();
+
+        try (FileInputStream fis = new FileInputStream(localFilePath);
+             JsonParser parser = factory.createParser(fis)) {
+
+            // Avanza fino all'inizio dell'array
+            while (parser.nextToken() != JsonToken.START_ARRAY) {
+                // Skip fino all'inizio dell'array
+            }
+
+            // Itera attraverso tutti gli elementi dell'array
+            while (parser.nextToken() != JsonToken.END_ARRAY) {
+                if (parser.currentToken() == JsonToken.START_OBJECT) {
+                    JSONObject playerInfo = parsePlayerObject(parser);
+                    String season = playerInfo.optString("season");
+                    String playerId = playerInfo.optString("player_id");
+
+                    if ("s_25_26".equals(season) && playerId != null) {
+                        // Mantieni solo i campi necessari
+                        JSONObject minimalInfo = createMinimalPlayerInfo(playerInfo);
+                        playerInfoMap.put(playerId, minimalInfo);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception("Errore nella lettura del file locale: " + localFilePath + " - " + e.getMessage(), e);
+        }
+        return playerInfoMap;
+    }
+
+    private JSONObject parsePlayerObject(JsonParser parser) throws Exception {
+        JSONObject playerInfo = new JSONObject();
+
+        while (parser.nextToken() != JsonToken.END_OBJECT) {
+            String fieldName = parser.getCurrentName();
+            parser.nextToken(); // Avanza al valore
+
+            switch (parser.currentToken()) {
+                case VALUE_STRING:
+                    playerInfo.put(fieldName, parser.getValueAsString());
+                    break;
+                case VALUE_NUMBER_INT:
+                    playerInfo.put(fieldName, parser.getValueAsInt());
+                    break;
+                case VALUE_NUMBER_FLOAT:
+                    playerInfo.put(fieldName, parser.getValueAsDouble());
+                    break;
+                case VALUE_TRUE:
+                    playerInfo.put(fieldName, true);
+                    break;
+                case VALUE_FALSE:
+                    playerInfo.put(fieldName, false);
+                    break;
+                case START_ARRAY:
+                case START_OBJECT:
+                    // Salta oggetti/array complessi (stats, etc.)
+                    parser.skipChildren();
+                    break;
+                default:
+                    // Ignora altri token
+            }
+        }
+
+        return playerInfo;
+    }
+
+    private JSONObject createMinimalPlayerInfo(JSONObject fullInfo) {
+        JSONObject minimal = new JSONObject();
+        minimal.put("player_id", fullInfo.optString("player_id"));
+        minimal.put("name", fullInfo.optString("name"));
+        minimal.put("team_name_short", fullInfo.optString("team_name_short"));
+        minimal.put("role", fullInfo.optString("role"));
+        minimal.put("season", fullInfo.optString("season"));
+        minimal.put("quotazione", fullInfo.optInt("quotazione"));
+        minimal.put("fvm", fullInfo.optInt("fvm"));
+        return minimal;
+    }
+
+    // Metodo per verificare se il file locale esiste
+    public boolean localFileExists() {
+        if (localFilePath == null) {
+            return false;
+        }
+        return java.nio.file.Files.exists(Paths.get(localFilePath));
+    }
+
+    // Metodo per ottenere il percorso del file locale
+    public String getLocalFilePath() {
+        return localFilePath;
+    }
+}
