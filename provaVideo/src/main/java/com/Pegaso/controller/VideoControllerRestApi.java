@@ -1,17 +1,17 @@
-package com.pegaso.PEGASO.controller;
+package com.Pegaso.controller;
 
+import com.Pegaso.dto.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.pegaso.PEGASO.dto.*;
-import com.pegaso.PEGASO.exception.ControllerException;
+import com.Pegaso.exception.ControllerException;
 
 import java.io.IOException;
 import java.net.http.HttpResponse;
 import java.util.List;
 
-import static com.pegaso.PEGASO.service.RestClient.sendGetRequest;
-import static com.pegaso.PEGASO.service.RestClient.sendPostRequest;
+import static com.Pegaso.service.RestClient.sendGetRequest;
+import static com.Pegaso.service.RestClient.sendPostRequest;
 
 public class VideoControllerRestApi {
 

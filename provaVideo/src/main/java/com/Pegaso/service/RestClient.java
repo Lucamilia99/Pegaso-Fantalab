@@ -1,7 +1,7 @@
-package com.pegaso.PEGASO.service;
+package com.Pegaso.service;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.pegaso.PEGASO.exception.ControllerException;
+import com.Pegaso.exception.ControllerException;
 
 import java.io.IOException;
 import java.net.URI;
@@ -9,7 +9,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
-import static com.pegaso.PEGASO.controller.VideoControllerRestApi.OBJECT_MAPPER;
+import static com.Pegaso.controller.VideoControllerRestApi.OBJECT_MAPPER;
 
 public class RestClient {
 

@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.pegaso</groupId>
-    <artifactId>provaVideo</artifactId>
+    <artifactId>Pegaso_fanta</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>provaVideo</name>
     <description>provaVideo</description>

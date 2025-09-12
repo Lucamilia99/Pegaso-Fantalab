@@ -1,4 +1,4 @@
-package com.pegaso.PEGASO.exception;
+package com.Pegaso.exception;
 
 
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package com.pegaso.PEGASO.service;
+package com.Pegaso.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 

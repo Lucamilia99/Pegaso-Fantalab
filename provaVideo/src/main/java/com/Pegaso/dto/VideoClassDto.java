@@ -1,4 +1,4 @@
-package com.pegaso.PEGASO.dto;
+package com.Pegaso.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
