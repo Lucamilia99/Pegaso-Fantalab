@@ -48,22 +48,6 @@ public class PlayerService {
                 .collect(Collectors.toList());
     }
 
-    public List<JSONObject> getMissingPlayerDetails() throws Exception {
-        List<String> missingIds = apiService.findMissingPlayerIds();
-        List<JSONObject> missingPlayers = new ArrayList<>();
-
-        // Qui potresti fare una chiamata API per ottenere i dettagli completi
-        // dei player mancanti, oppure restituire solo gli ID
-        for (String missingId : missingIds) {
-            JSONObject playerInfo = new JSONObject();
-            playerInfo.put("player_id", missingId);
-            playerInfo.put("status", "missing_in_local_file");
-            missingPlayers.add(playerInfo);
-        }
-
-        return missingPlayers;
-    }
-
     public void printPlayersWithNames(List<Player> players, Map<String, PlayerInfo> playerInfoMap) {
         // Mappa per l'ordinamento dei ruoli
         Map<String, Integer> ROLE_ORDER = Map.ofEntries(
