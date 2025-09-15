@@ -15,7 +15,7 @@ import static com.Pegaso.service.RestClient.sendPostRequest;
 
 public class VideoControllerRestApi {
 
-    private static final String COURSE_CODE = "0312209INGIND35";
+    private static final String COURSE_CODE = "0312212INF01IV";
     public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final int TOTAL_CHAPTER;
 
@@ -31,7 +31,7 @@ public class VideoControllerRestApi {
     private static final String BASE_URL = "https://lms-api.prod.pegaso.multiversity.click";
 
     public static void main(String[] args) throws ControllerException, IOException, InterruptedException {
-        int numberParagraph = 43;
+        int numberParagraph = 84;
         processParagraphs(numberParagraph);
     }
 

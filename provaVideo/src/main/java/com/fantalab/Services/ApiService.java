@@ -22,7 +22,7 @@ public class ApiService {
             .connectTimeout(Duration.ofSeconds(30))
             .build();
 
-    String numberPayload = "4d5d6eb4-521f-4274-8521-1f52c9314f81";
+    String numberPayload = "a9970f77-d028-4535-a7d2-b8a8e141909f";
     String apiUrl = "https://api.fantalab.it/v2/player-strategy";
     String payload = "{\"strategy_id\":\"" + numberPayload + "\"}";
     private final String authToken;
@@ -38,16 +38,6 @@ public class ApiService {
         HttpRequest request = getHttpRequest(apiUrl, payload);
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-        JSONArray responseArray2 = new JSONArray(response.body());
-        List<String> playerIds = new ArrayList<>();
-
-        for (int i = 0; i < responseArray2.length(); i++) {
-            JSONObject strategy = responseArray2.getJSONObject(i);
-            String playerId = strategy.getString("player_id");
-            playerIds.add(playerId);
-            System.out.println(i + " - " + playerId);
-        }
 
         if (response.statusCode() != 200) {
             throw new Exception("HTTP Error: " + response.statusCode() + " - " + response.body());

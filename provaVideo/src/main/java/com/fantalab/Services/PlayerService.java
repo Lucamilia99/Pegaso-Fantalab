@@ -19,10 +19,10 @@ public class PlayerService {
         Map<String, JSONObject> playerInfos = apiService.getPlayerInfosFromLocalFile();
 
         return strategyPlayers.stream()
-                .filter(player -> {
-                    int price = player.optInt("price", 0);
-                    return price > 0;
-                })
+//                .filter(player -> {
+//                    int price = player.optInt("price", 0);
+//                    return price > 0;
+//                })
                 .map(Player::new)
                 .filter(player -> playerInfos.containsKey(player.getPlayerId()))
                 .collect(Collectors.toList());
